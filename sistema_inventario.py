@@ -44,6 +44,11 @@ class Producto:
         nuevo_precio -- Nuevo precio a modificar
     """
     def actualizar_precio(self,nuevo_precio):
+        try:
+            nuevo_precio = float(nuevo_precio)
+        except (TypeError, ValueError):
+            raise ValueError('El nuevo precio debe poder convertirse a numero flotante')
+
         if (nuevo_precio < 0):
             raise ValueError('El nuevo precio debe ser positivo')
         self.precio = nuevo_precio
@@ -54,6 +59,11 @@ class Producto:
         nueva_cantidad -- Nuevo precio a modificar
     """
     def actualizar_cantidad(self,nueva_cantidad):
+        try:
+            nueva_cantidad = int(nueva_cantidad)
+        except (TypeError, ValueError):
+            raise ValueError('La cantidad debe poder convertirse a numero entero')
+
         if (nueva_cantidad < 0):
             raise ValueError('La cantidad debe ser mayor que 0')
         self.cantidad = nueva_cantidad    
