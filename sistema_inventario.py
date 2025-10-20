@@ -29,7 +29,7 @@ class Producto:
         except (TypeError, ValueError):
             raise ValueError("La cantidad debe poder convertirse a número flotante")
 
-        if (cantidad <= 0):
+        if (cantidad < 0):
             raise ValueError('La cantidad no puede ser menor que 0')
 
         
@@ -49,14 +49,14 @@ class Producto:
         self.precio = nuevo_precio
     
     """
-        Metodo para actualizar el precio de un producto
+        Metodo para actualizar la cantidad de productos
         Argumentos:
-        nuevo_precio -- Nuevo precio a modificar
+        nueva_cantidad -- Nuevo precio a modificar
     """
-    def actualizar_precio(self,nueva_cantidad):
+    def actualizar_cantidad(self,nueva_cantidad):
         if (nueva_cantidad < 0):
-            raise ValueError('La cantidad debe ser positiva')
-        self.cantidad = nueva_cantidad      
+            raise ValueError('La cantidad debe ser mayor que 0')
+        self.cantidad = nueva_cantidad    
 
     """
         Metodo para calcular el valor total de los productos, devuelve el precio del producto x la cantidad de productos            
@@ -100,7 +100,12 @@ class Inventario:
         nombre -- Nombre del producto a buscar
     """
     def buscar_producto(self,nombre):
-        return next(filter(lambda p: p.nombre.upper() == nombre.upper(), self.productos), None)
+        producto = next(filter(lambda p: p.nombre.upper() == nombre.upper(), self.productos), None)
+        if producto is None:
+            raise ValueError('Producto no encontrado')
+        else:
+            return producto
+        
 
     """
         Metodo que devuelve el valor total del inventario multiplicando el valor de los productos por su cantidad y sumandolos
@@ -112,7 +117,25 @@ class Inventario:
         Metodo que lista todos los productos del inventario
     """
     def listar_productos(self):
-        list(map(lambda p: print(p),self.productos))
+        for p in self.productos:
+            print(p)
+
+def pedir_numero(mensaje, condicion=lambda x: True):
+    while True:
+        try:
+            valor_string = input(mensaje)
+            valor = float(valor_string)
+            if condicion(valor):
+                return valor
+            print('El valor no cumple la condición.',condicion)
+        except:
+            try:
+                valor = int(valor_string)
+                if condicion(valor):
+                    return valor
+                print('El valor no cumple la condición.',condicion)
+            except:
+                print('Entrada no valida, intentalo de nuevo')
 
 def pedir_float(mensaje, condicion=lambda x: True):
     while True:
@@ -149,7 +172,9 @@ def menu_principal(inventario):
         print('2. Buscar producto')
         print('3. Calcular valor inventario')
         print('4. Listar productos')
-        print('5. Salir del programa')
+        print('5. Actualizar cantidad de producto')
+        print('6. Actualizar precio de producto')
+        print('7. Salir del programa')
     
         try:
             op = input('Introduzca una opción: ')
@@ -160,15 +185,16 @@ def menu_principal(inventario):
         match op:
             case 1:
                 nombre = pedir_string('Nombre del producto: ')
-                precio = pedir_float('Precio del producto: ', lambda x: x>0)
+                precio = pedir_numero('Precio del producto: ', lambda x: x>0)
                 cantidad = pedir_int('Cantidad de productos a agregar: ', lambda x: x>0)
                 producto = Producto(nombre,precio,cantidad)
                 inventario.agregar_producto(producto)
                 print('Producto agregado correctamente')
             case 2:
                 nombre_buscar = pedir_string('Nombre a buscar: ')
-                producto = inventario.buscar_producto(nombre_buscar)
-                if not producto:
+                try:
+                    producto = inventario.buscar_producto(nombre_buscar)
+                except:
                     print('Producto no encontrado')
                 else:
                     print(producto)
@@ -178,6 +204,26 @@ def menu_principal(inventario):
                 print('LISTA DE PRODUCTOS')
                 inventario.listar_productos()
             case 5:
+                nombre_buscar = pedir_string('Nombre de producto a actualizar: ')
+                try:
+                    producto = inventario.buscar_producto(nombre_buscar)                    
+                except:
+                    print('Producto no encontrado')
+                    
+                cantidad = pedir_int('Cantidad de elementos para el producto, '+ str(producto.nombre)+': ',lambda x: x>0)
+                producto.actualizar_cantidad(cantidad)
+                print('Cantidad de producto actualizada')
+            case 6:
+                nombre_buscar = pedir_string('Nombre de producto a actualizar: ')
+                try:
+                    producto = inventario.buscar_producto(nombre_buscar)                    
+                except:
+                    print('Producto no encontrado')
+                
+                precio = pedir_numero('Precio del producto, '+str(producto.nombre)+': ',lambda x: x>0)
+                producto.actualizar_precio(precio)
+                print('Precio de producto actualizada')
+            case 7:
                 break
             case _:
                 continue
